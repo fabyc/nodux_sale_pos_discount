@@ -2,10 +2,6 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
-msgctxt "field:sale.line,disaggregate_iva:"
-msgid "Disaggregate IVA"
-msgstr "Desglosar IVA"
-
-msgctxt "field:sale.line,rate:"
-msgid "Discount rate"
-msgstr "Porcentaje de descuento"
+msgctxt "model:res.group,name:group_cost_price_force_assignment"
+msgid "Cost Price Force Assignment"
+msgstr "Forzar precio menor al costo"
