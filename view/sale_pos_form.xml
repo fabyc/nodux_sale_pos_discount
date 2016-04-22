@@ -5,11 +5,12 @@
     <xpath
         expr="/form/notebook/page[@id=&quot;sale&quot;]/group[@id='sale_discount']"
         position="replace">
-        <group id="sale_discount" colspan="2" col="3" xexpand="0" position="1">
+        <!--group id="sale_discount" colspan="2" col="3" xexpand="0">
             <label name="sale_discount" xalign="1.0" xexpand="1"/>
-            <group id="discount_percent" colspan="1" col="2" xexpand="0">
-                <field name="sale_discount" factor="100" xalign="1.0" xexpand="0"/>
-            </group>
-        </group>
+            <field name="sale_discount" factor="100" xalign="1.0" xexpand="0"/>
+        </group-->
     </xpath>
+    
+    
 </data>
+

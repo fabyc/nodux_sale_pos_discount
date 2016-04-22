@@ -11,6 +11,12 @@ The COPYRIGHT file at the top level of this repository contains the full copyrig
             <field name="name">sale_line_form</field>
         </record>
         
+        <record model="ir.ui.view" id="sale_pos_view_form">
+            <field name="model">sale.sale</field>
+            <field name="inherit" ref="sale_pos.sale_pos_view_form"/>
+            <field name="name">sale_pos_form</field>
+        </record>
+
         <record model="res.group" id="group_cost_price_force_assignment">
             <field name="name">Cost Price Force Assignment</field>
         </record>
