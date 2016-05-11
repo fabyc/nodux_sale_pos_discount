@@ -16,20 +16,20 @@ __metaclass__ = PoolMeta
 
 class Sale:
     __name__ = 'sale.sale'
-    
+
     @classmethod
     def __setup__(cls):
         super(Sale, cls).__setup__()
-        
+
         cls.sale_discount.states['readonly'] |= Eval('invoice_state') != 'none'
-        
+
 class SaleLine:
     __name__ = 'sale.line'
-    
+
     aplicar_desglose = fields.Boolean('Aplicar con desglose')
     descuento_desglose = fields.Numeric('Descuento con desglose', states={
             'invisible': ~Eval('aplicar_desglose', True)})
-        
+
     @classmethod
     def __setup__(cls):
         super(SaleLine, cls).__setup__()
@@ -39,12 +39,16 @@ class SaleLine:
             cls.unit_price_w_tax.on_change_with.add('descuento_desglose')
         if 'descuento_desglose' not in cls.amount_w_tax.on_change_with:
             cls.amount_w_tax.on_change_with.add('descuento_desglose')
-            
+        if 'descuento_desglose' not in cls.amount.on_change_with:
+            cls.amount.on_change_with.add('descuento_desglose')
+
     def update_prices(self):
         unit_price = None
+        descuento = Decimal(0.0)
         gross_unit_price = gross_unit_price_wo_round = self.gross_unit_price
         sale_discount = Transaction().context.get('sale_discount')
         producto = self.product
+
         if producto:
             precio_costo = self.product.cost_price
         else:
@@ -65,7 +69,7 @@ class SaleLine:
                 return True
             user = User(user_id)
             return origin and group in user.groups
-            
+
         if sale_discount == None:
             if self.sale and hasattr(self.sale, 'sale_discount'):
                 sale_discount = self.sale.sale_discount or Decimal(0)
@@ -80,52 +84,83 @@ class SaleLine:
         if self.gross_unit_price is not None and (self.discount is not None
                 or sale_discount is not None or self.descuento_desglose is not None):
             unit_price = self.gross_unit_price
-            
-            if self.discount:
+
+            if self.discount and self.descuento_desglose:
+                if self.quantity:
+                    taxes = self.taxes
+                    desglose = self.descuento_desglose
+                    for t in taxes:
+                        porcentaje = 1 + t.rate
+                        unit_price = (desglose / porcentaje)
+                        print "Unit", unit_price, self.gross_unit_price
+
+                    d = (unit_price/self.gross_unit_price)/100
+                    dscto = 1- d
+                    print "Unit precio desglose", unit_price, d, dscto
+                    descuento = self.discount + d
+                else:
+                    descuento_inicial = 1 - (self.unit_price/self.gross_unit_price)
+                    descuento = descuento_inicial + self.discount
+
+                    desglose = self.descuento_desglose
+                    taxes = self.taxes
+                    if self.discount > 1:
+                        e_d = str(self.discount * 100)
+                        self.raise_user_error('No se puede aplicar un descuento de %s', e_d)
+
+                    unit_price *= (1 - (descuento))
+
+                    for t in taxes:
+                        porcentaje = 1 + t.rate
+                        unit = (desglose / porcentaje)
+
+                    d = ((unit*100)/self.gross_unit_price)/100
+                    dscto = 1- d
+
+
+            elif self.discount:
                 if self.discount > 1:
                     e_d = str(self.discount * 100)
                     self.raise_user_error('No se puede aplicar un descuento de %s', e_d)
                 unit_price *= (1 - self.discount)
-                
-            if sale_discount:
-                unit_price *= (1 - sale_discount)
-                
-            if self.descuento_desglose:
+
+            elif self.descuento_desglose:
                 taxes = self.taxes
                 desglose = self.descuento_desglose
-                for t in taxes:
-                    porcentaje = 1 + t.rate
-                    unit_price = desglose / porcentaje
-                d = ((unit_price*100)/self.gross_unit_price)/100   
+                if self.quantity:
+                    for t in taxes:
+                        porcentaje = 1 + t.rate
+                        unit_price = (desglose / porcentaje)
+                d = ((unit_price*100)/self.gross_unit_price)/100
                 dscto = 1- d
-                
+
             if self.discount and sale_discount:
                 discount = (self.discount + sale_discount
                     - self.discount * sale_discount)
                 if discount != 1:
                     gross_unit_price_wo_round = unit_price / (1 - discount)
-            
+
             elif self.discount and self.descuento_desglose:
-                discount = (self.discount + dscto)
-                if discount != 1:
-                    gross_unit_price_wo_round = unit_price / (1 - discount)
+                discount = (self.discount + d)
+                if descuento != 1:
+                    gross_unit_price_wo_round = self.gross_unit_price
+
             elif self.discount and self.discount != 1:
                 gross_unit_price_wo_round = unit_price / (1 - self.discount)
             elif sale_discount and sale_discount != 1:
                 gross_unit_price_wo_round = unit_price / (1 - sale_discount)
             elif self.descuento_desglose and self.descuento_desglose != 0:
                 gross_unit_price_wo_round = unit_price / (1 - dscto)
-                    
+
             digits = self.__class__.unit_price.digits[1]
             unit_price = unit_price
             digits = self.__class__.gross_unit_price.digits[1]
             gross_unit_price = gross_unit_price_wo_round.quantize(
                 Decimal(str(10.0 ** -digits)))
-            
         if unit_price < precio_costo:
             if not in_group():
                 self.raise_user_error('Precio de venta, menor al precio de costo')
-            
+
             self.raise_user_warning('not_price_%s' % self.id,
                         'Precio de venta %s, menor al precio de costo %s'
                         'Desea continuar con la venta.', (unit_price, precio_costo))
@@ -139,22 +174,22 @@ class SaleLine:
         '_parent_sale.sale_discount', 'descuento_desglose', 'product')
     def on_change_gross_unit_price(self):
         return self.update_prices()
-        
+
     @staticmethod
     def default_descuento_desglose():
-        return Decimal(0) 
-        
-    @fields.depends('gross_unit_price', 'discount',
+        return Decimal(0)
+
+    @fields.depends('gross_unit_price', 'discount', 'unit_price', 'amount'
         '_parent_sale.sale_discount', 'descuento_desglose', 'taxes', 'product')
     def on_change_discount(self):
         return self.update_prices()
-    
-    @fields.depends('gross_unit_price', 'descuento_desglose', 
-        '_parent_sale.sale_discount', 'discount', 'taxes', 'product')
+
+    @fields.depends('gross_unit_price', 'descuento_desglose', 'unit_price', 'amount'
+        '_parent_sale.sale_discount', 'discount', 'taxes', 'product', 'quantity')
     def on_change_descuento_desglose(self):
         return self.update_prices()
-        
-    @fields.depends('discount', '_parent_sale.sale_discount', 
+
+    @fields.depends('discount', '_parent_sale.sale_discount',
         'descuento_desglose')
     def on_change_product(self):
         res = super(SaleLine, self).on_change_product()
@@ -168,13 +203,12 @@ class SaleLine:
         if 'descuento_desglose' not in res:
             res['descuento_desglose'] = Decimal(0)
         return res
-        
-    @fields.depends('discount', '_parent_sale.sale_discount', 
+
+    @fields.depends('discount', '_parent_sale.sale_discount',
         'descuento_desglose', 'taxes', 'product')
     def on_change_quantity(self):
         res = super(SaleLine, self).on_change_quantity()
         if 'unit_price' in res:
-            self.gross_unit_price = res['unit_price']
+            self.gross_unit_price = res['gross_unit_price']
             res.update(self.update_prices())
         return res
-
