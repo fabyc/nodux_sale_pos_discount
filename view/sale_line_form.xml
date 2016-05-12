@@ -1,0 +1,78 @@
+<data>
+    <xpath expr="/form/notebook/page/label[@name='gross_unit_price']"
+        position="before">
+        <label name="aplicar_desglose"/>
+        <field name="aplicar_desglose"/>
+        <newline/>
+        <label name="descuento_desglose"/>
+        <field name="descuento_desglose"/>
+        <newline/>
+        <label name="discount"/>
+            <group id="discount" col="4">
+                <field name="discount" factor="100" xexpand="0" xfill="0"/>
+                <label name="discount" string="%" xalign="0.0" xexpand="1" xfill="1"/>
+                <newline/>
+            </group>
+
+    </xpath>
+
+    <xpath expr="/form/notebook/page/label[@name='gross_unit_price']"
+        position="replace">
+    </xpath>
+
+    <xpath expr="/form/notebook/page/field[@name='gross_unit_price']"
+        position="replace">
+    </xpath>
+
+    <xpath expr="/form/notebook/page/label[@name='unit_price']"
+        position="replace">
+    </xpath>
+
+    <xpath expr="/form/notebook/page/field[@name='unit_price']"
+        position="replace">
+    </xpath>
+
+    <xpath expr="/form/notebook/page/label[@name='discount']"
+        position="replace">
+    </xpath>
+
+    <xpath expr="/form/notebook/page/group[@id='discount']"
+        position="replace">
+    </xpath>
+
+    <xpath expr="/form/notebook/page/label[@name='descuento_desglose']"
+        position="before">
+        <newline/>
+        <label name="gross_unit_price"/>
+        <field name="gross_unit_price"/>
+        <newline/>
+    </xpath>
+
+    <xpath expr="/form/notebook/page/label[@name='amount']"
+        position="before">
+        <newline/>
+        <label name="unit_price"/>
+        <field name="unit_price"/>
+    </xpath>
+
+    <xpath expr="/form/notebook/page/label[@name='type']"
+        position="replace">
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='type']"
+        position="replace">
+    </xpath>
+
+    <xpath expr="/form/notebook/page/label[@name='sequence']"
+        position="replace">
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='sequence']"
+        position="replace">
+    </xpath>
+    <xpath expr="/form/notebook/page/label[@name='delivery_date']"
+        position="replace">
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='delivery_date']"
+        position="replace">
+    </xpath>
+
+</data>
