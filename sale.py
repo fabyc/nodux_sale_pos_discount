@@ -36,7 +36,7 @@ class SaleLine:
         cls.discount.states['invisible'] |= Eval ('aplicar_desglose', True)
         cls.unit_price.digits = (16, 6)
         cls.unit_price_w_tax.digits = (16, 4)
-        cls.amount_w_tax.digist = (16, 4)
+        cls.amount_w_tax.digits = (16, 4)
         if 'descuento_desglose' not in cls.unit_price_w_tax.on_change_with:
             cls.unit_price_w_tax.on_change_with.add('descuento_desglose')
         if 'descuento_desglose' not in cls.amount_w_tax.on_change_with:
