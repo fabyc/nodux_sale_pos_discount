@@ -12,9 +12,9 @@ from trytond.wizard import (Wizard, StateView, StateAction, StateTransition,
 from trytond.config import config
 
 __all__ = ['Sale', 'SaleLine']
-__metaclass__ = PoolMeta
 
 class Sale:
+    __metaclass__ = PoolMeta
     __name__ = 'sale.sale'
 
     @classmethod
@@ -24,6 +24,7 @@ class Sale:
         cls.sale_discount.states['readonly'] |= Eval('invoice_state') != 'none'
 
 class SaleLine:
+    __metaclass__ = PoolMeta
     __name__ = 'sale.line'
 
     aplicar_desglose = fields.Boolean('Aplicar con desglose')
@@ -37,6 +38,7 @@ class SaleLine:
         cls.unit_price.digits = (16, 6)
         cls.unit_price_w_tax.digits = (16, 4)
         cls.amount_w_tax.digits = (16, 4)
+        cls.descuento_desglose.digits = (16, 4)
         if 'descuento_desglose' not in cls.unit_price_w_tax.on_change_with:
             cls.unit_price_w_tax.on_change_with.add('descuento_desglose')
         if 'descuento_desglose' not in cls.amount_w_tax.on_change_with:
@@ -160,6 +162,7 @@ class SaleLine:
             digits = self.__class__.gross_unit_price.digits[1]
             gross_unit_price = gross_unit_price_wo_round.quantize(
                 Decimal(str(10.0 ** -digits)))
+        """
         if unit_price < precio_costo:
             if not in_group():
                 self.raise_user_error('Precio de venta, menor al precio de costo')
@@ -167,6 +170,14 @@ class SaleLine:
             self.raise_user_warning('not_price_%s' % self.id,
                         'Precio de venta %s, menor al precio de costo %s'
                         'Desea continuar con la venta.', (unit_price, precio_costo))
+        """
+        transaction = Transaction()
+        company = transaction.context['company']
+        Company = Pool().get('company.company')
+        companies = Company.search([('id', '=', company)])
+        for c in companies:
+            company = c
+        unit_price = company.currency.round(unit_price)
         return {
             'gross_unit_price': gross_unit_price,
             'gross_unit_price_wo_round': gross_unit_price_wo_round,
@@ -185,12 +196,12 @@ class SaleLine:
     @fields.depends('gross_unit_price', 'discount', 'unit_price', 'amount'
         '_parent_sale.sale_discount', 'descuento_desglose', 'taxes', 'product')
     def on_change_discount(self):
-        return self.update_prices()
+        self.update_prices()
 
     @fields.depends('gross_unit_price', 'descuento_desglose', 'unit_price', 'amount'
         '_parent_sale.sale_discount', 'discount', 'taxes', 'product', 'quantity')
     def on_change_descuento_desglose(self):
-        return self.update_prices()
+        self.update_prices()
 
     @fields.depends('discount', '_parent_sale.sale_discount',
         'descuento_desglose')

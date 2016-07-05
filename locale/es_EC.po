@@ -13,3 +13,7 @@ msgstr ""
 msgctxt "model:res.group,name:group_cost_price_force_assignment"
 msgid "Cost Price Force Assignment"
 msgstr "Forzar precio menor al costo"
+
+msgctxt "view:sale.line:"
+msgid "%"
+msgstr "%"
