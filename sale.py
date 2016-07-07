@@ -37,6 +37,7 @@ class SaleLine:
         cls.unit_price.digits = (16, 6)
         cls.unit_price_w_tax.digits = (16, 4)
         cls.amount_w_tax.digits = (16, 4)
+        cls.descuento_desglose.digits = (16, 4)
         if 'descuento_desglose' not in cls.unit_price_w_tax.on_change_with:
             cls.unit_price_w_tax.on_change_with.add('descuento_desglose')
         if 'descuento_desglose' not in cls.amount_w_tax.on_change_with:
@@ -160,13 +161,7 @@ class SaleLine:
             digits = self.__class__.gross_unit_price.digits[1]
             gross_unit_price = gross_unit_price_wo_round.quantize(
                 Decimal(str(10.0 ** -digits)))
-        if unit_price < precio_costo:
-            if not in_group():
-                self.raise_user_error('Precio de venta, menor al precio de costo')
-
-            self.raise_user_warning('not_price_%s' % self.id,
-                        'Precio de venta %s, menor al precio de costo %s'
-                        'Desea continuar con la venta.', (unit_price, precio_costo))
+        
         return {
             'gross_unit_price': gross_unit_price,
             'gross_unit_price_wo_round': gross_unit_price_wo_round,
