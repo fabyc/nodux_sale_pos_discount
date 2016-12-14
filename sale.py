@@ -96,11 +96,9 @@ class SaleLine:
                     for t in taxes:
                         porcentaje = 1 + t.rate
                         unit_price = (desglose / porcentaje)
-                        print "Unit", unit_price, self.gross_unit_price
 
                     d = (unit_price/self.gross_unit_price)/100
                     dscto = 1- d
-                    print "Unit precio desglose", unit_price, d, dscto
                     descuento = self.discount + d
                 else:
                     descuento_inicial = 1 - (self.unit_price/self.gross_unit_price)
@@ -161,7 +159,7 @@ class SaleLine:
             digits = self.__class__.gross_unit_price.digits[1]
             gross_unit_price = gross_unit_price_wo_round.quantize(
                 Decimal(str(10.0 ** -digits)))
-        
+
         return {
             'gross_unit_price': gross_unit_price,
             'gross_unit_price_wo_round': gross_unit_price_wo_round,

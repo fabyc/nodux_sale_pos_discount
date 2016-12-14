@@ -3,20 +3,20 @@
 The COPYRIGHT file at the top level of this repository contains the full copyright notices and license terms. -->
 <tryton>
     <data>
-        
+
         <record model="ir.ui.view" id="sale_line_view_form">
             <field name="model">sale.line</field>
             <field name="type">form</field>
             <field name="inherit" ref="sale.sale_line_view_form"/>
             <field name="name">sale_line_form</field>
         </record>
-        
+
         <record model="ir.ui.view" id="sale_pos_view_form">
             <field name="model">sale.sale</field>
             <field name="inherit" ref="sale_pos.sale_pos_view_form"/>
             <field name="name">sale_pos_form</field>
         </record>
-        
+
          <record model="ir.ui.view" id="sale_line_view_tree">
             <field name="model">sale.line</field>
             <field name="inherit"
@@ -27,13 +27,13 @@ The COPYRIGHT file at the top level of this repository contains the full copyrig
         <record model="res.group" id="group_cost_price_force_assignment">
             <field name="name">Cost Price Force Assignment</field>
         </record>
-        
+
         <record model="res.user-res.group"
             id="user_admin_group_cost_price_force_assignment">
             <field name="user" ref="res.user_admin"/>
             <field name="group" ref="group_cost_price_force_assignment"/>
         </record>
-        
+
         <record model="res.user-res.group"
             id="user_trigger_group_cost_price_force_assignment">
             <field name="user" ref="res.user_trigger"/>
