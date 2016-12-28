@@ -133,8 +133,13 @@ class SaleLine:
                     for t in taxes:
                         porcentaje = 1 + t.rate
                         unit_price = (desglose / porcentaje)
-                d = ((unit_price*100)/self.gross_unit_price)/100
-                dscto = 1- d
+
+                if self.gross_unit_price > Decimal(0.0):
+                    d = ((unit_price*100)/self.gross_unit_price)/100
+                    dscto = 1- d
+                else:
+                    d = ((unit_price*100)/unit_price)/100
+                    dscto = 1- d
 
             if self.discount and sale_discount:
                 discount = (self.discount + sale_discount
