@@ -97,11 +97,9 @@ class SaleLine:
                     for t in taxes:
                         porcentaje = 1 + t.rate
                         unit_price = (desglose / porcentaje)
-                        print "Unit", unit_price, self.gross_unit_price
 
                     d = (unit_price/self.gross_unit_price)/100
                     dscto = 1- d
-                    print "Unit precio desglose", unit_price, d, dscto
                     descuento = self.discount + d
                 else:
                     descuento_inicial = 1 - (self.unit_price/self.gross_unit_price)
@@ -178,11 +176,10 @@ class SaleLine:
         for c in companies:
             company = c
         unit_price = company.currency.round(unit_price)
-        return {
-            'gross_unit_price': gross_unit_price,
-            'gross_unit_price_wo_round': gross_unit_price_wo_round,
-            'unit_price': unit_price,
-            }
+
+        self.gross_unit_price = gross_unit_price
+        self.gross_unit_price_wo_round = gross_unit_price_wo_round
+        self.unit_price = unit_price
 
     @fields.depends('gross_unit_price', 'discount',
         '_parent_sale.sale_discount', 'descuento_desglose', 'product')
@@ -204,25 +201,23 @@ class SaleLine:
         self.update_prices()
 
     @fields.depends('discount', '_parent_sale.sale_discount',
-        'descuento_desglose')
+        'descuento_desglose', 'unit_price')
     def on_change_product(self):
-        res = super(SaleLine, self).on_change_product()
-        if 'unit_price' in res:
-            self.gross_unit_price = res['unit_price']
+        super(SaleLine, self).on_change_product()
+        if self.unit_price:
+            self.gross_unit_price = self.unit_price
             self.discount = Decimal(0)
             self.descuento_desglose = Decimal(0)
-            res.update(self.update_prices())
-        if 'discount' not in res:
-            res['discount'] = Decimal(0)
-        if 'descuento_desglose' not in res:
-            res['descuento_desglose'] = Decimal(0)
-        return res
+            self.update_prices()
+        if not self.discount:
+            self.discount = Decimal(0)
+        if not self.descuento_desglose:
+            self.descuento_desglose = Decimal(0)
 
     @fields.depends('discount', '_parent_sale.sale_discount',
-        'descuento_desglose', 'taxes', 'product')
+        'descuento_desglose', 'taxes', 'product', 'unit_price')
     def on_change_quantity(self):
-        res = super(SaleLine, self).on_change_quantity()
-        if 'unit_price' in res:
-            self.gross_unit_price = res['gross_unit_price']
-            res.update(self.update_prices())
-        return res
+        super(SaleLine, self).on_change_quantity()
+        if self.unit_price:
+            self.gross_unit_price = self.gross_unit_price
+            self.update_prices()

@@ -55,7 +55,7 @@
         <field name="unit_price"/>
     </xpath>
 
-    <xpath expr="/form/notebook/page/label[@name='type']"
+    <!--xpath expr="/form/notebook/page/label[@name='type']"
         position="replace">
     </xpath>
     <xpath expr="/form/notebook/page/field[@name='type']"
@@ -73,6 +73,6 @@
     </xpath>
     <xpath expr="/form/notebook/page/field[@name='delivery_date']"
         position="replace">
-    </xpath>
+    </xpath-->
 
 </data>
